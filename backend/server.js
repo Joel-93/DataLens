@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
 });
 
 // start server
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
@@ -32,4 +32,6 @@ app.get("/debug-users", (req, res) => {
     res.json(rows);
   });
 });
-
+app.use(cors({
+  origin: "*"
+}));

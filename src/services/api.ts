@@ -20,7 +20,7 @@ export interface Order {
   createdAt: string;
 }
 
-const API_URL = "http://localhost:5000/api/orders";
+const API_URL = "https://datalens-286v.onrender.com/api/orders"; // ✅ UPDATE TO PRODUCTION URL
 
 // 🔥 helper to get token
 const getAuthHeaders = () => {
