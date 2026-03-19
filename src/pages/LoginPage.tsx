@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth, UserRole } from '../context/AuthContext';
+import { useAuth} from '../context/AuthContext';
 import { BarChart2, Mail, Lock } from 'lucide-react';
+
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -9,17 +10,23 @@ export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login logic
-    const role: UserRole = email.includes('admin') ? 'admin' : 'user';
-    login({
-      id: Math.random().toString(36).substr(2, 9),
-      name: email.split('@')[0],
-      email,
-      role,
-    });
-    navigate(role === 'admin' ? '/dashboard' : '/orders');
+
+    try {
+      await login(email, password); // ✅ calls backend now
+
+      const user = JSON.parse(localStorage.getItem("datalens_user") || "{}");
+
+      if (user.role === "admin") {
+        navigate("/dashboard");
+      } else {
+        navigate("/orders");
+      }
+
+    } catch (err) {
+      console.error("Login failed", err);
+    }
   };
 
   return (

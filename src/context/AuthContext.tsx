@@ -12,7 +12,7 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (user: User) => void;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -32,14 +32,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem('datalens_user', JSON.stringify(userData));
+  const login = async (email: string, password: string) => {
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: email,       // ✅ MUST be string
+          password: password  // ✅ MUST be string
+        })
+      });
+
+      const data = await res.json();
+
+      console.log("LOGIN RESPONSE:", data); // 🔥 debug
+
+      if (!data.token) {
+        throw new Error(data.error || "Login failed");
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("datalens_user", JSON.stringify(data.user));
+
+      setUser(data.user);
+
+    } catch (error) {
+      console.error("Login error:", error);
+    }
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('datalens_user');
+    localStorage.removeItem('token'); // ✅ ADD THIS
   };
 
   return (

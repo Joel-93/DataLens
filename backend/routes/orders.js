@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-
+const auth = require("../middleware/auth");
 
 // =======================
 // GET ALL ORDERS
 // =======================
-router.get("/", (req, res) => {
+router.get("/",auth, (req, res) => {
 
   db.all("SELECT * FROM orders ORDER BY createdAt DESC", [], (err, rows) => {
 
@@ -28,7 +28,7 @@ router.get("/", (req, res) => {
 // =======================
 // CREATE ORDER
 // =======================
-router.post("/", (req, res) => {
+router.post("/", auth, (req, res) => {
 
   const order = req.body;
 
@@ -88,7 +88,7 @@ router.post("/", (req, res) => {
 // =======================
 // UPDATE ORDER
 // =======================
-router.put("/:id", (req, res) => {
+router.put("/:id", auth, (req, res) => {
 
   const id = req.params.id;
   const order = req.body;
@@ -150,7 +150,7 @@ router.put("/:id", (req, res) => {
 // =======================
 // DELETE ORDER
 // =======================
-router.delete("/:id", (req, res) => {
+router.delete("/:id", auth, (req, res) => {
 
   const id = req.params.id;
 

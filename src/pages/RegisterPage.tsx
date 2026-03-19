@@ -10,17 +10,38 @@ export const RegisterPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock register logic
-    const role: UserRole = email.includes('admin') ? 'admin' : 'user';
-    login({
-      id: Math.random().toString(36).substr(2, 9),
-      name,
-      email,
-      role,
-    });
-    navigate(role === 'admin' ? '/dashboard' : '/orders');
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          password: password
+        })
+      });
+
+      const data = await res.json();
+
+      console.log("REGISTER RESPONSE:", data);
+
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+
+      alert("Registration successful. Please login.");
+
+      navigate("/login");
+
+    } catch (err) {
+      console.error("Register error:", err);
+    }
   };
 
   return (

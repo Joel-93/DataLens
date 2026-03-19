@@ -10,7 +10,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
   } else {
     console.log("Connected to SQLite database");
 
-    // Create orders table if not exists
+    // ✅ Create orders table
     db.run(`
       CREATE TABLE IF NOT EXISTS orders (
         id TEXT PRIMARY KEY,
@@ -25,8 +25,8 @@ const db = new sqlite3.Database(dbPath, (err) => {
         country TEXT,
         product TEXT,
         quantity INTEGER,
-        unitPrice INTEGER,
-        totalAmount INTEGER,
+        unitPrice REAL,
+        totalAmount REAL,
         status TEXT,
         createdBy TEXT,
         createdAt TEXT
@@ -36,6 +36,23 @@ const db = new sqlite3.Database(dbPath, (err) => {
         console.error("Error creating orders table:", err.message);
       } else {
         console.log("Orders table ready");
+      }
+    });
+
+    // ✅ Create users table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT UNIQUE,
+        password TEXT,
+        role TEXT DEFAULT 'user'
+      )
+    `, (err) => {
+      if (err) {
+        console.error("Error creating users table:", err.message);
+      } else {
+        console.log("Users table ready");
       }
     });
 

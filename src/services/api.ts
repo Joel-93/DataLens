@@ -1,4 +1,4 @@
-// API service for DataLens (connected to Node.js + SQLite backend)
+// API service for DataLens (connected to Node.js + SQLite backend with JWT)
 
 export interface Order {
   id: string;
@@ -22,41 +22,72 @@ export interface Order {
 
 const API_URL = "http://localhost:5000/api/orders";
 
+// 🔥 helper to get token
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+};
+
 export const api = {
 
-  getOrders: async () => {
-    const res = await fetch(API_URL);
-    return res.json();
-  },
-
-  createOrder: async (orderData: any) => {
+  // =======================
+  // GET ORDERS
+  // =======================
+  getOrders: async (): Promise<Order[]> => {
     const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(orderData)
+      headers: getAuthHeaders(),
     });
 
     const data = await res.json();
-    return data; // ✅ IMPORTANT (must return backend id)
+
+    // 🔥 prevent crash if unauthorized
+    if (!Array.isArray(data)) {
+      console.error("Invalid response (likely unauthorized):", data);
+      return [];
+    }
+
+    return data;
   },
 
-  updateOrder: async (id: string, orderData: any) => {
-    const res = await fetch(`${API_URL}/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(orderData)
+  // =======================
+  // CREATE ORDER
+  // =======================
+  createOrder: async (orderData: any): Promise<Order> => {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(orderData),
     });
 
     return res.json();
   },
 
+  // =======================
+  // UPDATE ORDER
+  // =======================
+  updateOrder: async (id: string, orderData: any) => {
+    const res = await fetch(`${API_URL}/${id}`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(orderData),
+    });
+
+    return res.json();
+  },
+
+  // =======================
+  // DELETE ORDER
+  // =======================
   deleteOrder: async (id: string) => {
     const res = await fetch(`${API_URL}/${id}`, {
-      method: "DELETE"
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
     });
 
     return res.json();
