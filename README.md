@@ -7,7 +7,7 @@ DataLens is a full-stack web application for managing and visualizing data with 
 🔑 Admin Access (For Evaluation)
 Use this to quickly explore all features without creating an account:
 
-Username: admin
+email: admin@datalens.com
 
 Password: admin@123
 
