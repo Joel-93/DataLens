@@ -127,14 +127,13 @@ export const OrdersPage: React.FC = () => {
     }
     try {
       if (editingOrder) {
-        await api.updateOrder(editingOrder.id, formData);
+        const updatedOrder = await api.updateOrder(editingOrder.id, formData);
 
         setOrders(prev =>
           prev.map(o =>
-            o.id === editingOrder.id ? { ...o, ...formData } : o
+            o.id === editingOrder.id ? updatedOrder : o
           )
         );
-
       } else {
         const newOrder = await api.createOrder({
           ...formData,
@@ -152,13 +151,17 @@ export const OrdersPage: React.FC = () => {
   };
   const handleUpdateStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
-      await api.updateOrder(orderId, { status: newStatus });
+      const updatedOrder = await api.updateOrder(orderId, { status: newStatus });
 
       setOrders(prev =>
         prev.map(o =>
-          o.id === orderId ? { ...o, status: newStatus } : o
+          o.id === orderId ? updatedOrder : o
         )
       );
+
+      if (viewingOrder) {
+        setViewingOrder(updatedOrder);
+      }
 
       if (viewingOrder) {
         setViewingOrder({ ...viewingOrder, status: newStatus });
@@ -305,7 +308,7 @@ export const OrdersPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-slate-900 dark:text-white">
-                        {order.firstName} {order.lastName}
+                        {order.firstName || "Unknown"} {order.lastName || ""}
                       </div>
                       <div className="text-sm text-slate-500 dark:text-slate-400">{order.email}</div>
                     </td>
@@ -314,7 +317,8 @@ export const OrdersPage: React.FC = () => {
                       <div className="text-xs">Qty: {order.quantity}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-white font-medium">
-                      ${(order.totalAmount || 0).toLocaleString(undefined, {
+
+                      ${Number(order.totalAmount || 0).toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
                       })}

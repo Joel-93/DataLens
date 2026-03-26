@@ -20,42 +20,36 @@ export interface Order {
   createdAt: string;
 }
 
-const API_URL = "https://datalens-286v.onrender.com/api/orders"; // ✅ UPDATE TO PRODUCTION URL
+const API_URL = "/api/orders";
 
-// 🔥 helper to get token
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
 
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
+    ...(token && { Authorization: `Bearer ${token}` }),
   };
+};
+
+const handleResponse = async (res: Response) => {
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || "API Error");
+  }
+  return res.json();
 };
 
 export const api = {
 
-  // =======================
-  // GET ORDERS
-  // =======================
   getOrders: async (): Promise<Order[]> => {
     const res = await fetch(API_URL, {
       headers: getAuthHeaders(),
     });
 
-    const data = await res.json();
-
-    // 🔥 prevent crash if unauthorized
-    if (!Array.isArray(data)) {
-      console.error("Invalid response (likely unauthorized):", data);
-      return [];
-    }
-
-    return data;
+    const data = await handleResponse(res);
+    return Array.isArray(data) ? data : [];
   },
 
-  // =======================
-  // CREATE ORDER
-  // =======================
   createOrder: async (orderData: any): Promise<Order> => {
     const res = await fetch(API_URL, {
       method: "POST",
@@ -63,12 +57,9 @@ export const api = {
       body: JSON.stringify(orderData),
     });
 
-    return res.json();
+    return handleResponse(res);
   },
 
-  // =======================
-  // UPDATE ORDER
-  // =======================
   updateOrder: async (id: string, orderData: any) => {
     const res = await fetch(`${API_URL}/${id}`, {
       method: "PUT",
@@ -76,21 +67,15 @@ export const api = {
       body: JSON.stringify(orderData),
     });
 
-    return res.json();
+    return handleResponse(res);
   },
 
-  // =======================
-  // DELETE ORDER
-  // =======================
   deleteOrder: async (id: string) => {
     const res = await fetch(`${API_URL}/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+      headers: getAuthHeaders(),
     });
 
-    return res.json();
+    return handleResponse(res);
   }
-
 };

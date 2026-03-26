@@ -1,29 +1,22 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const ordersRoutes = require("./routes/orders");
+
 const app = express();
-app.use(express.json());
 
 // middleware
-app.use(cors());
+app.use(express.json());
+app.use(cors({
+  origin: "*"
+}));
 
 // routes
 app.use("/api/orders", ordersRoutes);
 app.use("/api/auth", require("./routes/auth"));
 
-// test route
-app.get("/", (req, res) => {
-  res.send("DataLens API is running...");
-});
-
-// start server
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
+// debug route
 app.get("/debug-users", (req, res) => {
   const db = require("./db");
 
@@ -32,6 +25,24 @@ app.get("/debug-users", (req, res) => {
     res.json(rows);
   });
 });
-app.use(cors({
-  origin: "*"
-}));
+
+// 🔥 SERVE FRONTEND (IMPORTANT)
+
+// Serve static files
+app.use(express.static(path.join(__dirname, "dist")));
+
+// React fallback
+// Serve static files
+app.use(express.static(path.join(__dirname, "dist")));
+
+// React fallback
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
+
+// start server
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
